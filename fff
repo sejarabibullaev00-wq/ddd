@@ -1,0 +1,59 @@
+
+
+
+IF OBJECT_ID('dbo.TempUsers', 'U') IS NOT NULL
+    DROP TABLE dbo.TempUsers;
+
+CREATE TABLE dbo.TempUsers (
+    id INT NULL,                 -- Разрешаем NULL
+    username NVARCHAR(50) NULL,  -- Разрешаем NULL
+    email NVARCHAR(100) NULL,    -- Разрешаем NULL
+    age INT NULL                 -- Разрешаем NULL
+);
+
+
+INSERT INTO dbo.TempUsers (id, username, email, age)
+VALUES 
+    (1, 'Ivan', 'ivan@mail.com', 25),
+    (2, 'Petr', NULL, 30),             -- email = NULL
+    (3, NULL, 'anon@mail.com', NULL),   -- username и age = NULL
+    (4, 'Anna', 'anna@mail.com', 22);
+
+PRINT 'Таблица dbo.TempUsers создана и заполнена данными с NULL.';
+GO
+
+
+-- Создаем таблицу с первичным ключом (PK). 
+-- Поля с PRIMARY KEY не могут содержать NULL.
+IF OBJECT_ID('dbo.Users', 'U') IS NOT NULL
+    DROP TABLE dbo.Users;
+
+CREATE TABLE dbo.Users (
+    id INT NOT NULL PRIMARY KEY, -- Первичный ключ (уникальный, не NULL)
+    username NVARCHAR(50) NOT NULL,
+    email NVARCHAR(100) NULL,    -- Остальные поля могут быть NULL
+    age INT NULL
+);
+
+PRINT 'Таблица dbo.Users создана с Primary Key.';
+GO
+
+
+INSERT INTO dbo.Users (id, username, email, age)
+SELECT 
+    id, 
+    ISNULL(username, 'Unknown') AS username, -- Заменяем NULL на 'Unknown' для NOT NULL поля
+    email, 
+    age
+FROM dbo.TempUsers
+WHERE id IS NOT NULL; -- Отфильтровываем строки, где id = NULL
+
+PRINT 'Данные успешно скопированы из dbo.TempUsers в dbo.Users.';
+GO
+
+-- Проверка результата
+SELECT * FROM dbo.TempUsers;
+SELECT * FROM dbo.Users;
+GO
+
+PRINT 'Все задания успешно выполнены!';
